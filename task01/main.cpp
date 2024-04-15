@@ -3,6 +3,7 @@
 #include <cassert>
 #include <vector>
 #include <filesystem>
+#include <functional>
 //
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
@@ -96,26 +97,31 @@ void dda_line(
   auto dx = x1 - x0;
   auto dy = y1 - y0;
   // write some code below to paint pixel on the line with color `brightness`
+  const std::function<void(float, float)> shade = [&img_data, &brightness, &width](const float x, const float y) {
+    const auto x_floor = static_cast<int>(floor(x));
+    const auto y_floor = static_cast<int>(floor(y));
+    img_data[x_floor * width + y_floor] = brightness;
+  };
   if (dx == 0) {
-    for (int i = 0; i < static_cast<int>(abs(dy)); i++) {
-      const int j = dy >= 0 ? i : -i;
-      const auto pix = static_cast<int>(x0);
-      const auto piy = static_cast<int>(y0 + j);
-      img_data[piy * width + pix] = brightness;
+    for (float i = 0; i < abs(dy); i += 1.f) {
+      const auto j = dy >= 0 ? i : -i;
+      const auto pix = x0;
+      const auto piy = y0 + j;
+      shade(pix, piy);
     }
   } else if(const auto m = dy/dx; abs(m) < 1){
-    for (int i = 0; i < static_cast<int>(abs(dx)); i++) {
-      const int j = dx >= 0 ? i : -i;
-      const auto pix = static_cast<int>(x0 + j);
-      const auto piy = static_cast<int>(y0 + j * m);
-      img_data[piy * width + pix] = brightness;
+    for (float i = 0; i < abs(dx); i += 1.f) {
+      const auto j = dx >= 0 ? i : -i;
+      const auto pix = x0 + j;
+      const auto piy = y0 + j * m;
+      shade(pix, piy);
     }
   } else {
-    for (int i = 0; i < static_cast<int>(abs(dy)); i++) {
-      const int j = dy >= 0 ? i : -i;
-      const auto pix = static_cast<int>(x0 + j / m);
-      const auto piy = static_cast<int>(y0 + j);
-      img_data[piy * width + pix] = brightness;
+    for (float i = 0; i < abs(dy); i += 1.f) {
+      const auto j = dy >= 0 ? i : -i;
+      const auto pix = x0 + j / m;
+      const auto piy = y0 + j;
+      shade(pix, piy);
     }
   }
 }
