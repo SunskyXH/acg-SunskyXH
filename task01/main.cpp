@@ -4,6 +4,8 @@
 #include <vector>
 #include <filesystem>
 #include <functional>
+#define _USE_MATH_DEFINES
+#include <cmath>
 //
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
