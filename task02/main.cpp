@@ -65,8 +65,26 @@ int number_of_intersection_ray_against_quadratic_bezier(
     const Eigen::Vector2f &pc,
     const Eigen::Vector2f &pe) {
   // comment out below to do the assignment
-  return number_of_intersection_ray_against_edge(org, dir, ps, pe);
+  // return number_of_intersection_ray_against_edge(org, dir, ps, pe);
   // write some code below to find the intersection between ray and the quadratic
+  const Eigen::Vector2f w(-dir.y(), dir.x());
+  const float a = (ps - 2 * pc + pe).dot(w);
+  const float b = (2 * (pc - ps)).dot(w);
+  const float c = (ps - org).dot(w);
+  int count = 0;
+  if (const float discriminant = b * b - 4 * a * c; discriminant >= 0) {
+    const std::function<bool(const float)> check = [&ps, &pc, &pe, &org, &dir] (const float t) -> bool {
+      if (t <= 0 || t >= 1) return false; // 0 < t < 1
+      const Eigen::Vector2f Pt = (1 - t) * (1 - t) * ps + 2 * t * (1 - t) * pc + t * t * pe;
+      const float s = (Pt - org).dot(dir);
+      return s > 0;
+    };
+    const float t1 = (-b + sqrt(discriminant)) / (2 * a);
+    const float t2 = (-b - sqrt(discriminant)) / (2 * a);
+    if (check(t1)) count++;
+    if (discriminant != 0 && check(t2)) count++;
+  }
+  return count;
 }
 
 int main() {
