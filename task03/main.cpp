@@ -69,7 +69,12 @@ void draw_3d_triangle_with_texture(
       // (Hint: formulate a linear system with 4x4 coefficient matrix and solve it to get the barycentric coordinate)
       Eigen::Matrix4f coeff;
       Eigen::Vector4f rhs;
-
+      coeff << q0.x(), q1.x(), q2.x(), -s.x(),
+               q0.y(), q1.y(), q2.y(), -s.y(),
+               q0.w(), q1.w(), q2.w(),     -1,
+                    1,      1,      1,      0;
+      rhs << 0, 0, 0, 1;
+      bc = coeff.colPivHouseholderQr().solve(rhs)({0, 1, 2});
       // do not change below
       auto uv = uv0 * bc[0] + uv1 * bc[1] + uv2 * bc[2]; // uv coordinate of the pixel
       // compute pixel coordinate of the texture
